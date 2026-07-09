@@ -5,7 +5,7 @@ import {
 	Folder,
 	DuplicateSchema,
 } from "./../utils/interfaces";
-import { BookmarksSchema, FilterSchema } from "./../utils/schemas";
+import { BookmarksSchema, FilterSchema } from "../utils/schemas";
 
 interface MainHeaderProps {
 	toggleBool: (key: string) => void;

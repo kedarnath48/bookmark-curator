@@ -81,62 +81,62 @@ export function getDomianFilter(link: BookmarksSchema, filtersData: FilterSchema
 
 	if (mainDomain) {
 
-			const checkMainDomain = (mainDomain: string) => {
-				const filterIndex = filtersData.findIndex(
-					(filter) => filter.maindomain === mainDomain
+		const checkMainDomain = (mainDomain: string) => {
+			const filterIndex = filtersData.findIndex(
+				(filter) => filter.maindomain === mainDomain
+			);
+			return filterIndex !== -1
+				? { filterIndex, filterData: filtersData[filterIndex] }
+				: null;
+		};
+
+		const processHost = (filter: FilterSchema, link: BookmarksSchema) => {
+			const hostname = link.hostname?.replace("www.", "") ?? "";
+			const hostExists = filter.hosts.some((host) => host.hostname === hostname);
+			if (!hostExists) {
+				const activeicon = hostname === link.domain && link.iconBase64 ? 0 : null;
+				filter.hosts.push({ hostname, activeicon, icons: [] });
+				filter.hosts.sort((a, b) => a.hostname.length - b.hostname.length);
+			}
+		};
+
+		const processIcon = (filter: FilterSchema, link: BookmarksSchema) => {
+			if (link.iconBase64) {
+				const iconExists = filter.icons.some(
+					(icon) => icon.icon === link.iconBase64
 				);
-				return filterIndex !== -1
-					? { filterIndex, filterData: filtersData[filterIndex] }
-					: null;
-			};
-
-			const processHost = (filter: FilterSchema, link: BookmarksSchema) => {
-				const hostname = link.hostname?.replace("www.", "") ?? "";
-				const hostExists = filter.hosts.some((host) => host.hostname === hostname);
-				if (!hostExists) {
-					const activeicon = hostname === link.domain && link.iconBase64 ? 0 : null;
-					filter.hosts.push({ hostname, activeicon, icons: [] });
-					filter.hosts.sort((a, b) => a.hostname.length - b.hostname.length);
+				if (!iconExists) {
+					filter.icons.push({
+						icon: link.iconBase64,
+						iconid: filter.hosts.length - 1,
+					});
 				}
-			};
+			}
+		};
 
-			const processIcon = (filter: FilterSchema, link: BookmarksSchema) => {
-				if (link.iconBase64) {
-					const iconExists = filter.icons.some(
-						(icon) => icon.icon === link.iconBase64
-					);
-					if (!iconExists) {
-						filter.icons.push({
-							icon: link.iconBase64,
-							iconid: filter.hosts.length - 1,
-						});
-					}
-				}
-			};
+		const defaulticon = () => { };
 
-			const defaulticon = () => {};
-
-			const processFilter = (
-				mainDomain: string,
-				filterData: FilterSchema | undefined
-			) => {
-				if (!filterData) {
-					const filter: FilterSchema = {
-						maindomain: mainDomain,
-						hosts: [],
-						defaulticon: null,
-						icons: [],
-					};
-					processHost(filter, link);
-					processIcon(filter, link);
-					filtersData.push(filter);
-				} else {
-					processIcon(filterData, link);
-					processHost(filterData, link);
-					defaulticon();
-					console.log(filterData);
-				}
-			};
+		const processFilter = (
+			mainDomain: string,
+			filterData: FilterSchema | undefined
+		) => {
+			if (!filterData) {
+				const filter: FilterSchema = {
+					maindomain: mainDomain,
+					hosts: [],
+					defaulticon: null,
+					icons: [],
+				};
+				processHost(filter, link);
+				processIcon(filter, link);
+				filtersData.push(filter);
+			} else {
+				processIcon(filterData, link);
+				processHost(filterData, link);
+				defaulticon();
+				console.log(filterData);
+			}
+		};
 		const existingFilter = checkMainDomain(mainDomain);
 		processFilter(mainDomain, existingFilter?.filterData);
 	}
@@ -156,7 +156,7 @@ export const customWriteToFile = async (
 	try {
 		let existingData: Data[] = [];
 		const existingContent = await readTextFile(title, {
-			dir: BaseDirectory.AppData,
+			baseDir: BaseDirectory.AppData,
 		});
 		existingData = existingContent ? JSON.parse(existingContent) : [];
 		let dataToWrite: Data[] | [];
@@ -176,12 +176,10 @@ export const customWriteToFile = async (
 		}
 
 		await writeTextFile(
+			title,
+			JSON.stringify(dataToWrite, null, 4),
 			{
-				path: title,
-				contents: JSON.stringify(dataToWrite, null, 4),
-			},
-			{
-				dir: BaseDirectory.AppData,
+				baseDir: BaseDirectory.AppData,
 			}
 		);
 

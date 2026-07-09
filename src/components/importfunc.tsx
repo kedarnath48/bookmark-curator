@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 
 
 import { Folder, ImportedJson, DuplicateSchema } from "./../utils/interfaces";
-import { BookmarksSchema, FilterSchema } from "./../utils/schemas";
+import { BookmarksSchema, FilterSchema } from "../utils/schemas";
 import { generateGUID } from "./../utils/utilsfunc";
 import { getBase64Data } from "./../utils/helper_fuctions";
 import { bookmarksToJSON } from "bookmarks-to-json";
@@ -84,11 +84,11 @@ const ImportBtn: React.FC<ImportBtnProps> = (props) => {
 			console.log("No file selected");
 		}
 		/*
-    const processObject = (obj: ImportedJson) => {
-      console.log(obj.title = obj.title || "Untitled");
-    }
-    data.forEach((obj) => processObject(obj));
-    */
+	const processObject = (obj: ImportedJson) => {
+	  console.log(obj.title = obj.title || "Untitled");
+	}
+	data.forEach((obj) => processObject(obj));
+	*/
 	};
 
 	const getUnsortedRoot = (fileName: string, data: ImportedJson[]) => {
@@ -182,7 +182,7 @@ const ImportBtn: React.FC<ImportBtnProps> = (props) => {
 					//	? `data:${base64Data?.mimeType};base64,${base64Data?.base64Data}`
 					//	: "",
 				};
-				if (bookmark.icon){
+				if (bookmark.icon) {
 					const validBase64 = getBase64Data(bookmark.icon);
 					const base64Data =
 						"data:" +
@@ -254,7 +254,7 @@ const ImportBtn: React.FC<ImportBtnProps> = (props) => {
 		//writeToFile("bookmarks.json", allLinks);
 		type Data = BookmarksSchema | Folder | DuplicateSchema | FilterSchema;
 		customWriteToFile("unsorted.json", rootArray, "add").then((data) => {
-			if (data){
+			if (data) {
 				const transformedData: Folder[] = data.map((item: Data) => {
 					return item as Folder;
 				})
@@ -262,7 +262,7 @@ const ImportBtn: React.FC<ImportBtnProps> = (props) => {
 			}
 		});
 		customWriteToFile("bookmarks.json", allLinks, "add").then((data) => {
-			if (data){
+			if (data) {
 				const transformedData: BookmarksSchema[] = data.map((item: Data) => {
 					return item as BookmarksSchema;
 				})
@@ -305,7 +305,7 @@ const ImportBtn: React.FC<ImportBtnProps> = (props) => {
 				style={{ display: "none" }}
 				onChange={handleFileChange}
 			/>
-			<button onClick={handleButtonClick}>{importTxt}</button>
+			<button id="headerImportBtn" onClick={handleButtonClick}>{importTxt}</button>
 			{selectedFile && (
 				<>
 					{/*

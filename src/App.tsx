@@ -1,40 +1,18 @@
 import { useState, useEffect } from "react";
-//import { appDataDir } from "@tauri-apps/api/path";
-
 import MainHeader from "./components/mainheader";
-
 import BookmarksContainer from "./components/bookmarks.tsx";
-import { checkAppDataDirExists } from "./utils/utilsfunc";
-
-import { BookmarksSchema, FilterSchema } from "./utils/schemas.tsx";
 import {
-	DuplicateSchema,
-	TrashSchema,
-	Folder,
-	TagSchema,
+	DuplicateSchema, TrashSchema, Folder, TagSchema
 } from "./utils/interfaces.tsx";
-//import { FolderSchema } from './utils/schemas.tsx';}
-
 import FolderTree from "./components/primarysidebar/folder_comp.tsx";
 import FiltersTree from "./components/secondarysidebar/tree.filters.tsx";
 import TagsTree from "./components/secondarysidebar/tree.tags.tsx";
-//import { getBase64Data } from "./utils/helper_fuctions.ts";
-
-import { allFiles } from "./utils/utilsfunc";
 import { customWriteToFile } from "./utils/helper_fuctions.ts";
-
 import { MoveModel } from "./modals/movemodel.tsx";
-
-//import TestComp from './components/test.tsx';
-
-import "./App.css";
-//import LandingComponent from './pages/landing.tsx';
-
-import { writeContent, generateGUID } from "./utils/utilsfunc";
-
-import { FolderSchema } from "./utils/schemas.tsx";
+import { allFiles, writeContent, generateGUID, checkAppDataDirExists } from "./utils/utilsfunc";
+import { BookmarksSchema, FilterSchema, FolderSchema } from "./utils/schemas.tsx";
 import { getAllFoldersRecursive } from "./utils/create_folder.ts";
-
+import "./App.css";
 import {
 	SettingsCog,
 	FolderTreeSvg,
@@ -43,6 +21,19 @@ import {
 } from "./assets/svg_icons.tsx";
 
 import { useToggle } from "./hooks/hooks.tsx";
+
+//import TestComp from './components/test.tsx';
+//import LandingComponent from './pages/landing.tsx';
+
+//import { appDataDir } from "@tauri-apps/api/path";
+//import { getBase64Data } from "./utils/helper_fuctions.ts";
+
+type t1 = {
+	bookmarkIndex: number;
+	bookmarkFolder: string;
+	bookmark: BookmarksSchema;
+	bookmarkid: number
+}
 
 function App() {
 	const [toggles, toggle] = useToggle({
@@ -202,6 +193,7 @@ function App() {
 			bookmarkIndex: number;
 			bookmarkFolder: string;
 			bookmark: BookmarksSchema;
+			bookmarkid: number
 		}[]
 	>([]);
 
@@ -229,6 +221,7 @@ function App() {
 						bookmarkIndex: bookmark.index,
 						bookmarkFolder: "bookmark.folder",
 						bookmark: bookmark,
+						bookmarkid: bookmark.id
 					},
 				]);
 			}
@@ -238,9 +231,47 @@ function App() {
 	};
 
 
-	function moveBookmark(destination: string) {
+	function moveBookmark(folderId: number) {
 		const timestamp = Date.now();
-		console.log("Move To == ", destination, timestamp, selectedBookmarks);
+		console.log("Move To == ", folderId, timestamp, selectedBookmarks);
+
+		let bookmarks: string[] = []
+		Object.values(selectedBookmarks).forEach(value => {
+			bookmarks.push(`${value.bookmarkid}`)
+		})
+
+		//const newdata = structuredClone(folderData)
+		//recurAdd(newdata)
+		const newdata = recurAdd(folderData)
+
+		function recurAdd(data: FolderSchema[]): FolderSchema[] {
+			let changed = false
+
+			return data.map((folder) => {
+				if (changed) {
+					return folder
+				}
+				if (folder.id === folderId) {
+					changed = true
+					return {
+						...folder,
+						bookmarks: [...new Set([...folder.bookmarks, ...bookmarks])]
+					}
+				}
+				if (folder.children && folder.children.length > 0) {
+					return {
+						...folder,
+						children: recurAdd(folder.children)
+					}
+				}
+				return folder
+			})
+		}
+
+		console.log("newdata", newdata, 'oldData', folderData)
+		setFolderData(newdata)
+		writeContent('collection.json', newdata)
+
 		setSelectedBookmarks([]);
 	}
 

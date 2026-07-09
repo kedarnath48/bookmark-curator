@@ -1,5 +1,5 @@
 import { SetStateAction } from "react";
-import { appDataDir, join } from "@tauri-apps/api/path";
+import { appDataDir, BaseDirectory, join } from "@tauri-apps/api/path";
 import {
   //BaseDirectory,
   mkdir,
@@ -17,15 +17,15 @@ import { FolderSchema } from "./schemas";
 
 
 export const allFiles: { [key: string]: string } = {
-	bookmarks: "bookmarks.json",
-	unsorted: "unsorted.json",
-	unsortedTree: "unsorted tree.json",
-	duplicates: "duplicates.json",
-	trash: "trash.json",
-	collection: "collection.json",
-	collectiontree: "collection tree.json",
-	filters: "filters.json",
-	tags: "tags.json",
+  bookmarks: "bookmarks.json",
+  unsorted: "unsorted.json",
+  unsortedTree: "unsorted tree.json",
+  duplicates: "duplicates.json",
+  trash: "trash.json",
+  collection: "collection.json",
+  collectiontree: "collection tree.json",
+  filters: "filters.json",
+  tags: "tags.json",
 };
 interface SetterFunctions {
   setBookmarksData: (value: SetStateAction<BookmarksSchema[]>) => void;
@@ -39,32 +39,34 @@ interface SetterFunctions {
 
 
 export async function checkAppDataDirExists(setters: SetterFunctions) {
+  const folderName = "bookmarks curator";
   try {
-      const appDataPath = await appDataDir();
+    const appDataPath = await appDataDir();
+    console.log(appDataPath)
 
-      if (!(await exists(appDataPath))) {
-        await mkdir(appDataPath);
-      }
+    if (!(await exists(folderName, { baseDir: BaseDirectory.AppData }))) {
+      await mkdir(folderName, { baseDir: BaseDirectory.AppData });
+    }
 
-      await ensureAllFiles(appDataPath);
+    await ensureAllFiles(appDataPath);
 
-      const {
-        setBookmarksData,
-        setUnsortedData,
-        setDuplicatesData,
-        setTrashData,
-        setFolderData,
-        setFiltersData,
-        setTagsData,
-      } = setters;
+    const {
+      setBookmarksData,
+      setUnsortedData,
+      setDuplicatesData,
+      setTrashData,
+      setFolderData,
+      setFiltersData,
+      setTagsData,
+    } = setters;
 
-      setBookmarksFunc(setBookmarksData);
-      setUnsortedFunc(setUnsortedData);
-      setDuplicatesFunc(setDuplicatesData);
-      setTrashFunc(setTrashData);
-      setCollectionFunc(setFolderData);
-      setFiltersFunc(setFiltersData);
-      setTagsFunc(setTagsData);
+    setBookmarksFunc(setBookmarksData);
+    setUnsortedFunc(setUnsortedData);
+    setDuplicatesFunc(setDuplicatesData);
+    setTrashFunc(setTrashData);
+    setCollectionFunc(setFolderData);
+    setFiltersFunc(setFiltersData);
+    setTagsFunc(setTagsData);
 
 
   } catch (error) {
@@ -75,6 +77,7 @@ export async function checkAppDataDirExists(setters: SetterFunctions) {
 
 
 async function ensureAllFiles(appDataPath: string) {
+  console.log("[path]", appDataPath)
   try {
     for (const fileName of Object.values(allFiles)) {
       const filePath = await path.join(appDataPath, fileName);
@@ -90,13 +93,20 @@ async function ensureAllFiles(appDataPath: string) {
 
 export async function setDataFromFilename<T>(filename: string, setState: (value: SetStateAction<T[]>) => void) {
   try {
-    const appDataPath = await appDataDir();
-    const fullPath = await join(appDataPath, filename); // Construct: C:\Users\...\bookmarks.json
+    const appDataPath = await appDataDir(); // Gets C:\Users\...\AppData\Roaming\your-app
+    const fullPath = await join(appDataPath, filename);
 
-    const fileExists = await exists(fullPath); 
+    console.log("Checking for file at:", fullPath);
+
+    // Use the absolute path directly without baseDir
+    const fileExists = await exists(fullPath);
+
     if (fileExists) {
       const fileData = await readTextFile(fullPath);
+      console.log(fileData)
       setState(JSON.parse(fileData));
+    } else {
+      console.warn("File does not exist at:", fullPath);
     }
   } catch (error) {
     console.error(`Error reading ${filename}:`, error);
@@ -126,7 +136,6 @@ export async function setTagsFunc(setTagsData: (value: SetStateAction<TagSchema[
   await setDataFromFilename<TagSchema>(allFiles.tags, setTagsData);
 }
 
-
 export async function writeContent(fileName: string, contents: FolderSchema[]) {
   const appDataPath = await appDataDir();
   let filePath = null;
@@ -134,17 +143,20 @@ export async function writeContent(fileName: string, contents: FolderSchema[]) {
     if (file === fileName) {
       filePath = await path.join(appDataPath, file);
       break
-    }else{
-      filePath = null;
     }
   }
-  if (filePath !== null){
-    await writeTextFile(filePath, JSON.stringify(contents));
-    //console.log("Data written to file successfully.", fileName, contents);
+  if (filePath !== null) {
+    try {
+      await writeTextFile(filePath, JSON.stringify(contents));
+      //console.log("Data written to file successfully.", fileName, contents);
+    } catch (err) {
+      return err
+      //throw console.error('file is not part of the app', fileName);
+    }
   }
 }
 
-
+//Note: Review
 async function createFile(filePath: string, contents: []) {
   await writeTextFile(filePath, JSON.stringify(contents));
 }

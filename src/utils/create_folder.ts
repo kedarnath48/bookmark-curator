@@ -1,5 +1,5 @@
 import { writeContent, generateGUID } from "../utils/utilsfunc";
-import { FolderSchema } from "../utils/schemas";
+import { FolderSchema } from "./schemas";
 
 // Placeholder for missing variables and functions
 const isExpanded = false;
@@ -76,7 +76,6 @@ export function getAllFoldersRecursive(
 			getAllFoldersRecursive(folder.children, allFolders);
 		}
 	});
-
 	return allFolders;
 }
 

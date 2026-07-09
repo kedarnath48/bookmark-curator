@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { Children, useState } from "react";
 import { FolderSchema } from "../../utils/schemas";
 import { writeContent, generateGUID } from "../../utils/utilsfunc";
 import { getAllFoldersRecursive } from "../../utils/create_folder";
@@ -8,6 +8,7 @@ import {
 	AddFolderIcon,
 	TrashBinIcon,
 } from "../../assets/svg_icons";
+//import { resolve } from "@tauri-apps/api/path";
 
 interface FolderTreeProps {
 	activeObjFunc: (guid: string, label: string, type: string) => void;
@@ -25,8 +26,8 @@ const FolderTree: React.FC<FolderTreeProps> = ({
 	activeObjFunc,
 	activeObj,
 	folderData,
-	setFolderData,
 	folderTreeBool,
+	setFolderData,
 }) => {
 	const folderList = getAllFoldersRecursive(folderData);
 	return (
@@ -44,7 +45,7 @@ const FolderTree: React.FC<FolderTreeProps> = ({
 					/>
 				)))
 				: (folderList.map((folder, index) => (
-					<div key={folder.guid+index}>
+					<div key={folder.guid + index}>
 						<button>{folder.label}</button>
 					</div>
 				)))}
@@ -62,16 +63,16 @@ interface FolderComponentProps {
 		type: string;
 	};
 	activeObjFunc: (guid: string, label: string, type: string) => void;
-	setFolderData: React.Dispatch<React.SetStateAction<FolderSchema[]>>;
 	folderData: FolderSchema[];
+	setFolderData: React.Dispatch<React.SetStateAction<FolderSchema[]>>;
 }
 
 const FolderComponent: React.FC<FolderComponentProps> = ({
 	folder,
 	activeObj,
 	activeObjFunc,
-	setFolderData,
 	folderData,
+	setFolderData,
 }) => {
 	const [label, setLabel] = useState("");
 	const [isEditing, setIsEditing] = useState(false);
@@ -212,6 +213,41 @@ const FolderComponent: React.FC<FolderComponentProps> = ({
 		createFolder();
 	};
 
+
+
+	const handleDeleteFolder = async (folder: FolderSchema) => {
+		const newFolderData = recurssiveDelete(folderData, folder.id)
+		const prevData = folderData
+		setFolderData(newFolderData)
+		//note write file pending
+		try {
+			await writeContent("11.json", newFolderData);
+			console.log("nodelay")
+		} catch (err) {
+			console.error(err)
+			setTimeout(() => {
+				console.log("delay")
+				setFolderData(prevData)
+				alert('error')
+			}, 2000);
+		}
+	}
+
+	function recurssiveDelete(folders: FolderSchema[], targetId: number): FolderSchema[] {
+		let result: FolderSchema[] = []
+		for (const folder of folders) {
+			if (folder.id === targetId) continue
+			if (folder.children && folder.children.length > 0) {
+				result.push({ ...folder, children: recurssiveDelete(folder.children, targetId) })
+			}
+			else {
+				result.push(folder)
+			}
+		}
+		return result
+	}
+
+
 	return (
 		<div
 			className={`folder ${isExpanded ? "expanded" : "collapsed"}`}
@@ -249,7 +285,7 @@ const FolderComponent: React.FC<FolderComponentProps> = ({
 							>
 								<AddFolderIcon />
 							</button>
-							<button>
+							<button title="delete folder" onClick={() => handleDeleteFolder(folder)}>
 								<TrashBinIcon />
 							</button>
 						</div>

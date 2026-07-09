@@ -1,11 +1,11 @@
 import React, { useRef, useEffect } from "react";
-import { FolderSchema } from "./../utils/schemas";
+import { FolderSchema } from "../utils/schemas";
 
 interface MoveModelProps {
 	onClose: () => void;
 	folderData: FolderSchema[];
 	toggleMove: (key: string) => void;
-	moveBookmark: (destination: string) => void;
+	moveBookmark: (folderID: number) => void;
 }
 
 export const MoveModel: React.FC<MoveModelProps> = ({
@@ -44,7 +44,7 @@ export const MoveModel: React.FC<MoveModelProps> = ({
 			<div key={folder.id} style={{ marginLeft: `${margin}px` }}>
 				<button className="label-header" onClick={() => {
 					toggleMove("moveBool");
-					moveBookmark(folder.label);
+					moveBookmark(folder.id);
 				}}>
 					<i className="fas fa-folder"></i>
 					<h4>{folder.label}</h4>

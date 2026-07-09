@@ -7,7 +7,7 @@ import React, {
 	useMemo,
 } from "react";
 import ImportFunc from "./importfunc";
-import { BookmarksSchema, FilterSchema } from "./../utils/schemas";
+import { BookmarksSchema, FilterSchema } from "../utils/schemas";
 import {
 	Folder,
 	DuplicateSchema,
@@ -176,7 +176,7 @@ const BookmarksContainer: React.FC<BookmarksContainerProps> = (props) => {
 		} else if (activeCatObj.type === "tag") {
 			// Handle tag filtering
 		}
-		if(activeAlphabet){
+		if (activeAlphabet) {
 			filtered = bookmarksData.filter((bookmark) =>
 				bookmark.domainWithoutSuffix?.startsWith(activeAlphabet)
 			);
@@ -200,14 +200,13 @@ const BookmarksContainer: React.FC<BookmarksContainerProps> = (props) => {
 	return (
 		<div
 			ref={containerRef}
-			className={`bookmarks-ctr ${
-				filteredBookmarks.filtered.length === 0 ? "no-bookmarks" : ""
-			}`}
+			className={`bookmarks-ctr ${filteredBookmarks.filtered.length === 0 ? "no-bookmarks" : ""
+				}`}
 			style={{ overflowY: "auto", height: "calc(100vh - 90px)" }}
 		>
 			{filteredBookmarks.filtered.length === 0 &&
-			activeCatObj.label !== "unsorted" &&
-			activeCatObj.label !== "duplicates" ? (
+				activeCatObj.label !== "unsorted" &&
+				activeCatObj.label !== "duplicates" ? (
 				<>
 					<h2 className="title">{activeCatObj.label}</h2>
 					<div className="empty-bookmarks">
@@ -251,7 +250,7 @@ const BookmarksContainer: React.FC<BookmarksContainerProps> = (props) => {
 						</div>
 						{selectedBookmarks.length > 0 && (
 							<div className="">
-								<button onClick={() => toggleMove("moveBool")}>Move</button>
+								<button id="moveDialogBtn" onClick={() => toggleMove("moveBool")}>Move</button>
 								<button>Add tags</button>
 								<button>Remove</button>
 								<button>Export</button>
@@ -515,9 +514,8 @@ export const LoadBookmarks: React.FC<LoadBookmarksProps> = ({
 						<div className="site-title">
 							{bookmark.iconBase64 && (
 								<img
-									src={`data:${
-										getBase64Data(bookmark.iconBase64)?.mimeType
-									};base64,${getBase64Data(bookmark.iconBase64)?.base64Data}`}
+									src={`data:${getBase64Data(bookmark.iconBase64)?.mimeType
+										};base64,${getBase64Data(bookmark.iconBase64)?.base64Data}`}
 									alt="favicon"
 								/>
 							)}
