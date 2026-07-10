@@ -1,0 +1,99 @@
+{
+    "identifier": "migrated",
+    "description": "permissions that were migrated from v1",
+    "local": true,
+    "windows": [
+        "main"
+    ],
+    "permissions": [
+        "core:default",
+        "dialog:default",
+        "os:default",
+        "fs:default",
+        "dialog:allow-open",
+        "os:allow-platform",
+        "os:allow-version",
+        "os:allow-os-type",
+        "os:allow-family",
+        "os:allow-arch",
+        "os:allow-exe-extension",
+        "os:allow-locale",
+        "os:allow-hostname",
+        "global-shortcut:allow-is-registered",
+        "global-shortcut:allow-register",
+        "global-shortcut:allow-unregister",
+        "global-shortcut:allow-unregister-all",
+        {
+            "identifier": "fs:allow-read-text-file",
+            "allow": [
+                {
+                    "path": "$APPDATA/**"
+                },
+                {
+                    "path": "$ROAMING/bookmarks curator/**"
+                }
+            ]
+        },
+        {
+            "identifier": "fs:allow-write-text-file",
+            "allow": [
+                {
+                    "path": "$APPDATA/**"
+                },
+                {
+                    "path": "$ROAMING/bookmarks curator/**"
+                }
+            ]
+        },
+        {
+            "identifier": "fs:allow-read-file",
+            "allow": [
+                {
+                    "path": "$APPDATA/**"
+                },
+                {
+                    "path": "$ROAMING/bookmarks curator/**"
+                }
+            ]
+        },
+        {
+            "identifier": "fs:allow-copy-file",
+            "allow": [
+                {
+                    "path": "$APPDATA/**"
+                },
+                {
+                    "path": "$ROAMING/bookmarks curator/**"
+                }
+            ]
+        },
+        {
+            "identifier": "fs:allow-mkdir",
+            "allow": [
+                {
+                    "path": "$APPDATA/**"
+                },
+                {
+                    "path": "$ROAMING/bookmarks curator/**"
+                }
+            ]
+        },
+        {
+            "identifier": "fs:allow-exists",
+            "allow": [
+                {
+                    "path": "$APPDATA/**"
+                },
+                {
+                    "path": "$ROAMING"
+                },
+                {
+                    "path": "$ROAMING/bookmarks curator"
+                },
+                {
+                    "path": "$ROAMING/bookmarks curator/**"
+                }
+            ]
+        }
+    ]
+}

@@ -59,15 +59,26 @@ export async function checkAppDataDirExists(setters: SetterFunctions) {
       setFiltersData,
       setTagsData,
     } = setters;
+    // Note: CleanUp
+    /*  setBookmarksFunc(setBookmarksData);
+        setUnsortedFunc(setUnsortedData);
+        setDuplicatesFunc(setDuplicatesData);
+        setTrashFunc(setTrashData);
+        setCollectionFunc(setFolderData);
+        setFiltersFunc(setFiltersData);
+        setTagsFunc(setTagsData); */
 
-    setBookmarksFunc(setBookmarksData);
-    setUnsortedFunc(setUnsortedData);
-    setDuplicatesFunc(setDuplicatesData);
-    setTrashFunc(setTrashData);
-    setCollectionFunc(setFolderData);
-    setFiltersFunc(setFiltersData);
-    setTagsFunc(setTagsData);
 
+    const setfileData = {
+      bookmarks: setBookmarksData,
+      unsorted: setUnsortedData,
+      duplicates: setDuplicatesData,
+      trash: setTrashData,
+      collection: setFolderData,
+      filters: setFiltersData,
+      tags: setTagsData,
+    }
+    await loadDataFromAllFiles(setfileData)
 
   } catch (error) {
     console.error("Error in checkAppDataDirExists:", error);
@@ -91,6 +102,80 @@ async function ensureAllFiles(appDataPath: string) {
   }
 }
 
+
+type AllFilesTypes = {
+  bookmarks: BookmarksSchema;
+  unsorted: Folder;
+  duplicates: DuplicateSchema;
+  trash: TrashSchema;
+  collection: FolderSchema;
+  filters: FilterSchema;
+  tags: TagSchema;
+};
+type FileDataSetterMap = {
+  [K in keyof AllFilesTypes]: (value: SetStateAction<AllFilesTypes[K][]>) => void;
+};
+async function loadDataFromAllFiles(fileDataSetter: FileDataSetterMap) {
+  try {
+    for (const key of Object.keys(allFiles) as Array<keyof AllFilesTypes>) {
+      const jsonFileName = allFiles[key];
+      const setterFunc = fileDataSetter[key];
+
+      if (setterFunc) {
+        console.log(`Loading data for: ${jsonFileName}`);
+        await setDataFromFilename<AllFilesTypes[typeof key]>(
+          jsonFileName,
+          setterFunc as (value: any) => void
+        );
+      }
+    }
+  } catch (err) {
+    console.error("Error loading data from files in loop:", err);
+  }
+}
+
+export async function initializationFilesAndLoadData(setters: SetterFunctions) {
+  const folderName = "bookmarks curator";
+
+  try {
+    const appDataPath = await appDataDir();
+
+    if (!(await exists(folderName, { baseDir: BaseDirectory.AppData }))) {
+      await mkdir(folderName, { baseDir: BaseDirectory.AppData });
+    }
+
+    const fileDataSetter: FileDataSetterMap = {
+      bookmarks: setters.setBookmarksData,
+      unsorted: setters.setUnsortedData,
+      duplicates: setters.setDuplicatesData,
+      trash: setters.setTrashData,
+      collection: setters.setFolderData,
+      filters: setters.setFiltersData,
+      tags: setters.setTagsData,
+    };
+
+    for (const key of Object.keys(allFiles) as Array<keyof AllFilesTypes>) {
+      const fileName = allFiles[key];
+      const filePath = await path.join(appDataPath, fileName);
+      const setterFunc = fileDataSetter[key];
+      if (!(await exists(filePath))) {
+        console.log(`Creating missing file: ${fileName}`);
+        await createFile(filePath, []);
+      }
+
+      if (setterFunc) {
+        console.log(`Loading data from: ${fileName}`);
+        const fileData = await readTextFile(filePath);
+        (setterFunc as (value: any) => void)(JSON.parse(fileData));
+      }
+    }
+
+  } catch (error) {
+    console.error("Initialization failed:", error);
+  }
+  return "AppDataDirExists";
+}
+
 export async function setDataFromFilename<T>(filename: string, setState: (value: SetStateAction<T[]>) => void) {
   try {
     const appDataPath = await appDataDir(); // Gets C:\Users\...\AppData\Roaming\your-app
@@ -103,8 +188,8 @@ export async function setDataFromFilename<T>(filename: string, setState: (value:
 
     if (fileExists) {
       const fileData = await readTextFile(fullPath);
-      console.log(fileData)
       setState(JSON.parse(fileData));
+
     } else {
       console.warn("File does not exist at:", fullPath);
     }
@@ -112,7 +197,8 @@ export async function setDataFromFilename<T>(filename: string, setState: (value:
     console.error(`Error reading ${filename}:`, error);
   }
 }
-
+// Note: CleanUp or 
+// keep if them i might use them for just single file assignment / collapse thse function one single func setFileData
 export async function setBookmarksFunc(setBookmarksData: (value: SetStateAction<BookmarksSchema[]>) => void) {
   await setDataFromFilename<BookmarksSchema>(allFiles.bookmarks, setBookmarksData);
 }

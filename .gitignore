@@ -28,3 +28,4 @@ data
 src-tauri/gen/
 .stignore
 .stfolder/
+package-lock.json

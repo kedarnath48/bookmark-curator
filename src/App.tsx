@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { register, unregisterAll } from '@tauri-apps/plugin-global-shortcut';
 import MainHeader from "./components/mainheader";
 import BookmarksContainer from "./components/bookmarks.tsx";
 import {
@@ -28,12 +29,15 @@ import { useToggle } from "./hooks/hooks.tsx";
 //import { appDataDir } from "@tauri-apps/api/path";
 //import { getBase64Data } from "./utils/helper_fuctions.ts";
 
+/*
 type t1 = {
 	bookmarkIndex: number;
 	bookmarkFolder: string;
 	bookmark: BookmarksSchema;
 	bookmarkid: number
 }
+*/
+
 
 function App() {
 	const [toggles, toggle] = useToggle({
@@ -237,7 +241,7 @@ function App() {
 
 		let bookmarks: string[] = []
 		Object.values(selectedBookmarks).forEach(value => {
-			bookmarks.push(`${value.bookmarkid}`)
+			bookmarks.push(`${value.bookmark.guid}`)
 		})
 
 		//const newdata = structuredClone(folderData)
@@ -267,6 +271,23 @@ function App() {
 				return folder
 			})
 		}
+		/* function recurAdd(data: FolderSchema[]): boolean {
+			for (const folder of data) {
+				if (folder.id === folderId) {
+					folder.bookmarks = [...new Set([...folder.bookmarks, ...bookmarks])];
+					return true;
+				}
+				
+				// 2. Check children safely
+				if (folder.children && folder.children.length > 0) {
+					const foundInChildren = recurAdd(folder.children);
+					if (foundInChildren) {
+						return true;
+					}
+				}
+			}
+			return false;
+		} */
 
 		console.log("newdata", newdata, 'oldData', folderData)
 		setFolderData(newdata)
@@ -295,6 +316,56 @@ function App() {
 		console.log(selectedBookmarks);
 	}, [selectedBookmarks]);
 
+	const togglesRef = useRef(toggles);
+	const lastTriggeredRef = useRef<number>(0);
+
+	useEffect(() => {
+		togglesRef.current = toggles;
+	}, [toggles]);
+
+	useEffect(() => {
+		const setupShortcuts = async () => {
+			try {
+				await unregisterAll();
+
+				const canTrigger = () => {
+					const now = Date.now();
+					if (now - lastTriggeredRef.current < 300) {
+						return false;
+					}
+					lastTriggeredRef.current = now;
+					return true;
+				};
+
+				await register('CommandOrControl+b', () => {
+					if (!canTrigger()) return;
+
+					toggle("PSActive");
+					console.log('Shortcut triggered b', togglesRef.current.PSActive);
+				});
+
+				await register('CommandOrControl+Alt+B', () => {
+					if (!canTrigger()) return;
+
+					toggle("SSActive");
+					console.log('Shortcut triggered Alt+B', togglesRef.current.SSActive);
+				});
+
+				await register('CommandOrControl+K', () => {
+					if (!canTrigger()) return;
+					console.log('Shortcut triggered K');
+				});
+			} catch (error) {
+				console.error("Failed to register Tauri shortcuts:", error);
+			}
+		};
+
+		setupShortcuts();
+
+		return () => {
+			unregisterAll();
+		};
+	}, [toggle]);
 	return (
 		<>
 			<div
@@ -499,6 +570,7 @@ function App() {
 								bookmarksData={bookmarksData}
 								unsortedData={unsortedData}
 								duplicatesData={duplicatesData}
+								folderData={folderData}
 								setBookmarksData={setBookmarksData}
 								setUnsortedData={setUnsortedData}
 								setDuplicatesData={setDuplicatesData}

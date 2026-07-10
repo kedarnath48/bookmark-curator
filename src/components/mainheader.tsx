@@ -31,7 +31,7 @@ const MainHeader: React.FC<MainHeaderProps> = (props) => {
 		activeCatObj,
 		hACatObjChangeProp,
 		isSettingsVisible,
-		getDataLength,
+		//getDataLength,
 		bookmarksData,
 		setBookmarksData,
 		setUnsortedData,

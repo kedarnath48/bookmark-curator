@@ -1,4 +1,4 @@
-import React, { Children, useState } from "react";
+import React, { useState } from "react";
 import { FolderSchema } from "../../utils/schemas";
 import { writeContent, generateGUID } from "../../utils/utilsfunc";
 import { getAllFoldersRecursive } from "../../utils/create_folder";
@@ -192,7 +192,12 @@ const FolderComponent: React.FC<FolderComponentProps> = ({
 		});
 
 		setFolderData(updatedCollectionData);
-		writeContent("collection.json", updatedCollectionData);
+		try {
+			writeContent("collection.json", updatedCollectionData);
+
+		} catch (err) {
+			console.log('failed to save data', err)
+		}
 
 		const idArray = [];
 		const newAllFolders = getAllFoldersRecursive(folderData);

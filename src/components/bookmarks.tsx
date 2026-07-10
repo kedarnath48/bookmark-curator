@@ -7,7 +7,7 @@ import React, {
 	useMemo,
 } from "react";
 import ImportFunc from "./importfunc";
-import { BookmarksSchema, FilterSchema } from "../utils/schemas";
+import { BookmarksSchema, FilterSchema, FolderSchema } from "../utils/schemas";
 import {
 	Folder,
 	DuplicateSchema,
@@ -32,6 +32,7 @@ interface BookmarksContainerProps {
 	bookmarksData: BookmarksSchema[];
 	unsortedData: Folder[];
 	duplicatesData: DuplicateSchema[];
+	folderData: FolderSchema[];
 
 	setBookmarksData: React.Dispatch<React.SetStateAction<BookmarksSchema[]>>;
 	setUnsortedData: React.Dispatch<React.SetStateAction<Folder[]>>;
@@ -55,6 +56,7 @@ const BookmarksContainer: React.FC<BookmarksContainerProps> = (props) => {
 		bookmarksData,
 		unsortedData,
 		duplicatesData,
+		folderData,
 		setBookmarksData,
 		setUnsortedData,
 		setDuplicatesData,
@@ -144,6 +146,7 @@ const BookmarksContainer: React.FC<BookmarksContainerProps> = (props) => {
 	const filteredBookmarks = useMemo(() => {
 		let filtered: BookmarksSchema[] = [];
 		let folderName: string | null = null;
+		console.log("activeCatObj", activeCatObj)
 		if (activeCatObj.type === "category") {
 			switch (activeCatObj.label) {
 				case "all bookmarks":
@@ -169,6 +172,11 @@ const BookmarksContainer: React.FC<BookmarksContainerProps> = (props) => {
 				default:
 					break;
 			}
+		} else if (activeCatObj.type === "folder") {
+			const folderBookmarkIds = getFolder(activeCatObj.guid);
+			filtered = bookmarksData.filter((bookmark) =>
+				folderBookmarkIds.includes(bookmark.guid)
+			);
 		} else if (activeCatObj.type === "collection") {
 			// Handle collection filtering
 		} else if (activeCatObj.type === "filter") {
@@ -197,6 +205,23 @@ const BookmarksContainer: React.FC<BookmarksContainerProps> = (props) => {
 		getAllLinks,
 		//duplicatesData,
 	]);
+	function getFolder(guid: string): string[] {
+		const folder = getFolderRecurssive(guid, folderData)
+		return folder ? folder.bookmarks : []
+	}
+	function getFolderRecurssive(guid: string, data: FolderSchema[]): FolderSchema | null {
+		for (const folder of data) {
+			if (folder.guid === guid) return folder
+			if (folder.children && folder.children.length > 0) {
+				const childResult = getFolderRecurssive(guid, folder.children)
+				if (childResult !== null) {
+					return childResult
+				}
+
+			}
+		}
+		return null
+	}
 	return (
 		<div
 			ref={containerRef}
@@ -206,9 +231,12 @@ const BookmarksContainer: React.FC<BookmarksContainerProps> = (props) => {
 		>
 			{filteredBookmarks.filtered.length === 0 &&
 				activeCatObj.label !== "unsorted" &&
-				activeCatObj.label !== "duplicates" ? (
+				activeCatObj.label !== "duplicates" && activeCatObj.type !== 'folder' ? (
 				<>
-					<h2 className="title">{activeCatObj.label}</h2>
+					<h2 className="title">
+						<span title={activeCatObj.guid} style={{ cursor: "pointer" }}># </span>
+						{activeCatObj.label}
+					</h2>
 					<div className="empty-bookmarks">
 						<h2>No bookmarks</h2>
 						<p>Add link or drop file</p>
@@ -391,6 +419,23 @@ const BookmarksContainer: React.FC<BookmarksContainerProps> = (props) => {
 					{activeCatObj.type === "collection" && (
 						<div className={activeCatObj.label}>
 							<h1>asdasd</h1>
+						</div>
+					)}
+					{activeCatObj.type === "folder" && (
+						<div className={activeCatObj.label}>
+							{filteredBookmarks.filtered ? (
+								<LoadBookmarks
+									filteredBookmarks={filteredBookmarks.filtered}
+									showTagsBool={showTagsBool}
+									showMoreBool={showMoreBool}
+									showUrlBool={showUrlBool}
+									selectedBookmarks={selectedBookmarks}
+									handleBookmarkClick={handleBookmarkClick}
+								/>
+							) : (
+								"no bookmarks"
+
+							)}
 						</div>
 					)}
 				</div>
