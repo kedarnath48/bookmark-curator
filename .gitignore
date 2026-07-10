@@ -26,3 +26,5 @@ src-tauri/Cargo.lock
 src-tauri/target
 data
 src-tauri/gen/
+.stignore
+.stfolder/
