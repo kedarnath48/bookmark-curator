@@ -47,7 +47,7 @@ const MainHeader: React.FC<MainHeaderProps> = (props) => {
 		<button
 			key={label} // Assigning the label as the key
 			className={`ctg-btn ${activeCatObj.label === label ? "active" : ""}`}
-			onClick={() => hACatObjChangeProp(obj.guid, obj.label, obj.type)}
+			onClick={() => { hACatObjChangeProp(obj.label, obj.label, obj.type), console.log(label, obj.guid, obj.label, obj.type) }}
 		>
 			{label.charAt(0).toUpperCase() + label.slice(1)}
 		</button>
@@ -98,7 +98,7 @@ const MainHeader: React.FC<MainHeaderProps> = (props) => {
 				>
 					<i className="fa-solid fa-table-columns"></i>
 				</button>
-				<button id="add-btn" type="button">
+				<button id="add-btn" type="button" onClick={() => toggleBool('showDialog')}>
 					<i className="fa-solid fa-star"></i>
 					<span className="txt">Add</span>
 				</button>

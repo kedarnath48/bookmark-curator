@@ -23,6 +23,8 @@ import {
 
 import { useToggle } from "./hooks/hooks.tsx";
 
+import AddModel from "./ui/components/addModel.tsx";
+
 //import TestComp from './components/test.tsx';
 //import LandingComponent from './pages/landing.tsx';
 
@@ -48,6 +50,7 @@ function App() {
 		SSActive: false,
 		expandAll: false,
 		moveBool: false,
+		showDialog: false
 	});
 
 	const [bookmarksData, setBookmarksData] = useState<BookmarksSchema[]>([]);
@@ -64,6 +67,9 @@ function App() {
 		label: "all bookmarks",
 		type: "category",
 	});
+	useEffect(() => {
+		console.log("[App]", activeCollObj)
+	})
 	const [activeSettingsTab, setActiveSettingsTab] = useState("Filters");
 
 	const [activeFilter, setActiveFilter] = useState<string | null>(null);
@@ -75,6 +81,16 @@ function App() {
 	useEffect(() => {
 		fetchData();
 	}, []);
+	useEffect(() => {
+		if (toggles.showDialog) {
+			document.querySelector("dialog")?.showModal()
+		}
+		else {
+			document.querySelector("dialog")?.close()
+		}
+	}, [toggles.showDialog]);
+
+
 	const fetchData = async () => {
 		try {
 			const dataFromAppDir = await checkAppDataDirExists({
@@ -95,7 +111,7 @@ function App() {
 	};
 
 	const updateActiveCollObj = (guid: string, label: string, type: string) => {
-		if (activeCollObj.label !== label) {
+		if (activeCollObj.guid !== guid) {
 			setActiveCollObj({ guid, label, type });
 		}
 	};
@@ -647,6 +663,12 @@ function App() {
 					toggleMove={toggle}
 					moveBookmark={moveBookmark}
 				/>
+			)}
+
+			{toggles.showDialog && (
+				<dialog id="my-dialog">
+					<AddModel toggles={toggle} />
+				</dialog>
 			)}
 		</>
 	);
