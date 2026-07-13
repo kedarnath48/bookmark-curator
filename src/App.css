@@ -147,7 +147,7 @@
 	}
 
 	dialog {
-		margin: auto;
+		margin: auto auto 30% auto;
 		padding: 12px;
 		border: none;
 		border-radius: 12px
@@ -167,6 +167,18 @@
 		button {
 			padding: 8px
 		}
+	}
+
+	.single-line-text {
+		white-space: nowrap;
+		/* Prevents the text from wrapping to a new line */
+		overflow: hidden;
+		/* Hides the text that extends beyond the container */
+		text-overflow: ellipsis;
+		/* Adds the '...' at the end of the cut-off text */
+
+		width: 200px;
+		/* Optional: The container must have a defined width (or max-width) */
 	}
 }
 

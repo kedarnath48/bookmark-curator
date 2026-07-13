@@ -340,9 +340,12 @@ function App() {
 	}, [toggles]);
 
 	useEffect(() => {
+		let isMounted = true;
+
 		const setupShortcuts = async () => {
 			try {
 				await unregisterAll();
+				if (!isMounted) return;
 
 				const canTrigger = () => {
 					const now = Date.now();
@@ -355,14 +358,12 @@ function App() {
 
 				await register('CommandOrControl+b', () => {
 					if (!canTrigger()) return;
-
 					toggle("PSActive");
 					console.log('Shortcut triggered b', togglesRef.current.PSActive);
 				});
 
 				await register('CommandOrControl+Alt+B', () => {
 					if (!canTrigger()) return;
-
 					toggle("SSActive");
 					console.log('Shortcut triggered Alt+B', togglesRef.current.SSActive);
 				});
@@ -379,9 +380,10 @@ function App() {
 		setupShortcuts();
 
 		return () => {
-			unregisterAll();
+			isMounted = false;
+			unregisterAll().catch((err) => console.error("Failed to cleanup shortcuts:", err));
 		};
-	}, [toggle]);
+	}, []);
 	return (
 		<>
 			<div
@@ -667,7 +669,9 @@ function App() {
 
 			{toggles.showDialog && (
 				<dialog id="my-dialog">
-					<AddModel toggles={toggle} />
+					{
+						"add" === "add" ? <AddModel toggles={toggle} /> : ""
+					}
 				</dialog>
 			)}
 		</>
