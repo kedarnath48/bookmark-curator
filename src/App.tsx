@@ -25,6 +25,8 @@ import { useToggle } from "./hooks/hooks.tsx";
 
 import AddModel from "./ui/components/addModel.tsx";
 
+import PaletteModel from "./ui/components/paletteModel.tsx"
+
 //import TestComp from './components/test.tsx';
 //import LandingComponent from './pages/landing.tsx';
 
@@ -81,6 +83,8 @@ function App() {
 	useEffect(() => {
 		fetchData();
 	}, []);
+
+	const [activeDialog, setActiveDialog] = useState("")
 	useEffect(() => {
 		if (toggles.showDialog) {
 			document.querySelector("dialog")?.showModal()
@@ -370,6 +374,8 @@ function App() {
 
 				await register('CommandOrControl+K', () => {
 					if (!canTrigger()) return;
+					setActiveDialog("palette")
+					toggle("showDialog")
 					console.log('Shortcut triggered K');
 				});
 			} catch (error) {
@@ -670,7 +676,10 @@ function App() {
 			{toggles.showDialog && (
 				<dialog id="my-dialog">
 					{
-						"add" === "add" ? <AddModel toggles={toggle} /> : ""
+						activeDialog === "add" && <AddModel toggles={toggle} />
+					}
+					{
+						activeDialog === "palette" &&  <PaletteModel />
 					}
 				</dialog>
 			)}
