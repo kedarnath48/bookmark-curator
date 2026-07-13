@@ -5,6 +5,7 @@ const PaletteModel = () => {
       <div className="input-container">
         <input type="text" />
       </div>
+      <div className="palette-list"></div>
     </div>
   )
 }
