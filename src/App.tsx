@@ -584,6 +584,7 @@ function App() {
 							filtersData={filtersData}
 							setFiltersData={setFiltersData}
 							getDataLength={getDataLength}
+							setActiveDialog={setActiveDialog}
 						/>
 						<main>
 							{/*<LandingComponent />*/}

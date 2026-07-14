@@ -23,6 +23,7 @@ interface MainHeaderProps {
 	setDuplicatesData: React.Dispatch<React.SetStateAction<DuplicateSchema[]>>;
 	filtersData: FilterSchema[];
 	setFiltersData: React.Dispatch<React.SetStateAction<FilterSchema[]>>;
+	setActiveDialog: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const MainHeader: React.FC<MainHeaderProps> = (props) => {
@@ -38,6 +39,7 @@ const MainHeader: React.FC<MainHeaderProps> = (props) => {
 		setDuplicatesData,
 		filtersData,
 		setFiltersData,
+		setActiveDialog
 	} = props;
 
 	const createButton = (
@@ -98,7 +100,7 @@ const MainHeader: React.FC<MainHeaderProps> = (props) => {
 				>
 					<i className="fa-solid fa-table-columns"></i>
 				</button>
-				<button id="add-btn" type="button" onClick={() => toggleBool('showDialog')}>
+				<button id="add-btn" type="button" onClick={() => {setActiveDialog('add'), toggleBool('showDialog')}}>
 					<i className="fa-solid fa-star"></i>
 					<span className="txt">Add</span>
 				</button>

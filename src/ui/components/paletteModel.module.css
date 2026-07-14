@@ -1,0 +1,47 @@
+
+.inputContainer{
+  width: 100%;
+  input{
+    width: inherit;
+    height: 24px;
+    padding: 4px;
+    background-color: transparent;
+    border: 1px solid #cfcfcf;
+    border-radius: 4px;
+  }
+}
+
+.item{
+  display: flex;
+  justify-content: space-between;
+}
+
+.optionsContainer {
+  list-style: none;
+
+  &.top {
+    &::after {
+      content: "";
+      display: block;
+      margin: auto;
+
+      margin: 8px auto 12px;
+      border-bottom: 1px solid #cccccc54;
+      width: 80%;
+    }
+  }
+
+  li{
+    display: flex;
+    justify-content: space-between;
+    padding:  8px 10px;
+  
+  }
+  .cmdName{
+    margin-right: auto;
+  }
+  .cmdTypeIcon{
+    color: red;
+    margin-right: 12px;
+  }
+}
